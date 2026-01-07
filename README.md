@@ -177,7 +177,7 @@ Honest Answer
 
 ✅What It Is
 
-- It is a hybrid agentic system consisting of:
+It is a hybrid agentic system consisting of:
 
 - A deterministic decision core
 
@@ -225,16 +225,16 @@ To run the system locally, follow the steps below.
 
 ✅Key Challenges and How They Were Solved
 
-Hallucination in AI Explanations
+- Hallucination in AI Explanations
 This was addressed by enforcing schema-constrained outputs, eliminating free-form reasoning, and introducing strict validation with deterministic fallbacks.
 
-Combining Rules with an LLM
+- Combining Rules with an LLM
 Decision authority was strictly separated from explanation generation. LangGraph was used to enforce execution boundaries and state flow.
 
-Explainability Without Overclaiming AI
+- Explainability Without Overclaiming AI
 The system intentionally avoids presenting itself as a fully autonomous agent. Architectural tradeoffs are documented clearly and honestly.
 
-UI Formatting of Generated Text
+- UI Formatting of Generated Text
 Streamlit rendering issues were resolved by rendering explanations line-by-line and avoiding ambiguous Markdown formatting.
 
 ✅Use Cases
