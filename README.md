@@ -104,206 +104,166 @@ ELIGIBILITY_CONFIG = {
     "max_dti": 0.40,
     "default_lookback_months": 24
 }
+```
+✅Eligibility Rules Explained
 
-Rules Explained
+The loan eligibility decision is based on a fixed set of deterministic rules. Each rule is evaluated independently, and the final verdict is derived from the combined outcome of all checks.
 
-KYC Verification
+- KYC Verification
+The applicant must have completed Know Your Customer (KYC) verification. This is a mandatory gating condition—if KYC is not verified, the application is immediately rejected.
 
-Applicant must be KYC verified
+- Age Eligibility
+The applicant’s age must fall within an acceptable range, defined as 21 to 60 years. Applications outside this range are considered ineligible.
 
-Mandatory gating rule
+- Income Threshold
+The applicant must meet a minimum annual income requirement. This ensures a baseline repayment capacity before further checks are performed.
 
-Age Eligibility
+- Credit Score Check
+The applicant’s credit score must meet or exceed a predefined cutoff. This rule acts as a proxy for historical credit behavior and repayment discipline.
 
-Age must be between 21 and 60
+- Debt-to-Income Ratio (DTI)
+The system evaluates the ratio of total monthly loan EMIs to monthly income. The application passes this check only if the ratio remains within the acceptable limit, ensuring the applicant is not over-leveraged.
 
-Income Threshold
+- Recent Loan Default
+The applicant must not have any recent loan or credit card defaults within the defined lookback period (e.g., the last 24 months). Any recent default results in rejection.
 
-Annual income must meet minimum threshold
+✅Decision Trace (Explainability by Design)
 
-Credit Score Check
+For every eligibility evaluation, the system produces a decision trace.
+This trace records the outcome of each individual rule check, clearly indicating whether it passed or failed.
 
-Credit score must meet minimum cutoff
+The decision trace serves three critical purposes:
 
-Debt-to-Income Ratio (DTI)
+- It provides full transparency into how the verdict was reached.
 
-Monthly EMI / Monthly Income ≤ 40%
+- It enables auditability, making the system suitable for regulated environments.
 
-Recent Loan Default
+- It ensures that correctness does not depend on AI-generated explanations.
 
-No loan or credit card default within last 24 months
+The decision trace is the authoritative source of truth for the eligibility decision.
 
-🧾 Decision Trace (Explainability by Design)
+✅Why the AI Explanation Feels “Template-like”
 
-For every evaluation, the system produces a decision trace:
+- This behavior is intentional and by design.
 
-[
-  {"check": "KYC Verification", "status": "PASS"},
-  {"check": "Age Eligibility", "status": "PASS"},
-  {"check": "Income Threshold", "status": "PASS"},
-  {"check": "Credit Score", "status": "PASS"},
-  {"check": "Debt-to-Income Ratio", "status": "PASS"},
-  {"check": "Recent Loan Default", "status": "PASS"}
-]
+- Key Design Choice
 
-This trace ensures:
+- The language model is not allowed to interpret, infer, or justify decisions. Its role is limited strictly to restating known system outcomes.
 
-Full transparency
+✅Why This Restriction Exists
 
-Auditability
+- Free-form LLM explanations are prone to hallucination.
 
-No reliance on AI explanations for correctness
+- Financial decisions require explanations that are verifiable and factual.
 
-🤖 Why the AI Explanation Feels “Template-like”
+- Regulatory and compliance requirements demand deterministic reasoning.
 
-This is intentional.
+✅How This Is Enforced
 
-Key Design Choice
+- The LLM is constrained to structured output formats.
 
-The LLM is not allowed to interpret, infer, or justify decisions.
+- It is only allowed to restate facts already present in system state.
 
-Why?
+- Outputs are validated, and invented or speculative language is rejected.
 
-Free-form explanations hallucinate
+- A deterministic fallback explanation is used if the LLM fails or misbehaves.
 
-Financial explanations must be verifiable
+- As a result, explanations may appear repetitive or “template-like,” but they are correct, safe, and auditable, which is the desired outcome in this domain.
 
-Regulators require deterministic reasoning
-
-How this is handled
-
-LLM is constrained to structured JSON output
-
-Only allowed to restate known system facts
-
-Hard validation rejects invented language
-
-Deterministic fallback used if LLM misbehaves
-
-This results in boring but correct explanations, which is the desired outcome in this domain.
-
-🧠 Is This an AI Agent?
+✅Is This an AI Agent?
 Honest Answer
 
-This is not a fully autonomous AI agent.
+- This system is not a fully autonomous AI agent.
 
-What it is
+✅What It Is
 
-A hybrid agentic system
+- It is a hybrid agentic system consisting of:
 
-Deterministic decision core
+- A deterministic decision core
 
-Agentic orchestration layer
+- An agentic orchestration layer
 
-LLM-assisted explanation module
+- An LLM-assisted explanation module
 
-Where it aligns with AI Agent architecture
+✅Where It Aligns with AI Agent Architecture
 
-Explicit agent state
+- Explicit shared agent state
 
-Conditional execution
+- Conditional execution of steps
 
-Tool isolation
+- Clear separation of tools and responsibilities
 
-Separation of concerns
+- Separation of concerns between decision logic and explanation
 
-Orchestration via LangGraph
+- Execution orchestration implemented using LangGraph
 
-Why full autonomy was avoided
+✅Why Full Autonomy Was Avoided
 
-Loan decisions must be auditable
+- Loan decisions must be explainable and auditable
 
-Autonomous policy reasoning is risky
+- Autonomous policy reasoning introduces risk
 
-Learned behavior is often disallowed in finance
+- Learned or adaptive behavior is often disallowed in financial systems
 
-This reflects real-world production constraints, not a limitation.
+- These constraints reflect real-world production requirements, not architectural limitations.
 
-🛠️ Setup & Run Instructions (Step-by-Step)
-1. Clone the Repository
-git clone <repo-url>
-cd loan-eligibility-agent
+✅Setup and Run Instructions (Step-by-Step)
 
-2. Create Virtual Environment
-python -m venv .venv
+To run the system locally, follow the steps below.
 
-3. Activate Virtual Environment
+- First, clone the repository and navigate into the project directory.
+- Next, create a Python virtual environment and activate it based on your operating system.
+- Once activated, install all required dependencies using the provided requirements file.
 
-Windows
+✅After setup:
 
-.\.venv\Scripts\Activate.ps1
+- Start the backend using FastAPI to expose the eligibility API.
 
+- Optionally access the API documentation via the built-in Swagger UI.
 
-Linux / macOS
+- Launch the Streamlit frontend to interact with the system through a user interface.
 
-source .venv/bin/activate
+✅Key Challenges and How They Were Solved
 
-4. Install Dependencies
-pip install -r requirements.txt
+Hallucination in AI Explanations
+This was addressed by enforcing schema-constrained outputs, eliminating free-form reasoning, and introducing strict validation with deterministic fallbacks.
 
-5. Run Backend (FastAPI)
-uvicorn app.api:app --host 127.0.0.1 --port 8000
+Combining Rules with an LLM
+Decision authority was strictly separated from explanation generation. LangGraph was used to enforce execution boundaries and state flow.
 
+Explainability Without Overclaiming AI
+The system intentionally avoids presenting itself as a fully autonomous agent. Architectural tradeoffs are documented clearly and honestly.
 
-Optional:
+UI Formatting of Generated Text
+Streamlit rendering issues were resolved by rendering explanations line-by-line and avoiding ambiguous Markdown formatting.
 
-Open http://127.0.0.1:8000/docs to test API
+✅Use Cases
 
-6. Run Frontend (Streamlit)
-python -m streamlit run frontend.py
+This system can be applied to:
 
-⚠️ Key Challenges & How They Were Solved
-1. Hallucination in Explanations
+- Fintech loan eligibility pre-check workflows
 
-Solved using schema-constrained output
+- Internal underwriting and screening tools
 
-Removed free-form reasoning
+- Explainable decision-making demonstrations
 
-Added validation + fallback logic
+- Reference implementations for agentic system design
 
-2. Mixing Rules with LLM
+- Portfolio projects for AI and GenAI engineering roles
 
-Separated decision authority from explanation
-
-LangGraph used to enforce boundaries
-
-3. Explainability vs Overclaiming AI
-
-Explicitly avoided calling this an autonomous agent
-
-Documented design tradeoffs clearly
-
-4. UI Formatting of Generated Text
-
-Streamlit rendering issues fixed via line-by-line rendering
-
-Avoided Markdown ambiguity
-
-📌 Use Cases
-
-Fintech eligibility pre-check systems
-
-Internal underwriting tools
-
-Explainable decision demos
-
-Agentic system architecture reference
-
-Interview / portfolio project for AI engineers
-
-🚫 Disclaimer
+⚠️Disclaimer
 
 This project is for demonstration and educational purposes only.
-It does not represent real lending policies or financial advice.
+It does not represent real lending policies or constitute financial advice.
 
-🧠 Final Notes
+✅Final Notes
 
 This project intentionally prioritizes:
 
-correctness over cleverness
+- Correctness over cleverness
 
-transparency over autonomy
+- Transparency over autonomy
 
-safety over hype
+- Safety over hype
 
-The architecture reflects how real-world AI systems are actually built in regulated domains.
+- The architecture reflects how real-world AI systems are built in regulated domains, where explainability and control matter more than unchecked autonomy.
